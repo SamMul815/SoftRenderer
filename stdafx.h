@@ -27,3 +27,8 @@
 
 #define FORCEINLINE __forceinline	
 
+FORCEINLINE float Deg2Rad(float degree)
+{
+	return degree * PI / 180.0f;
+}
+
