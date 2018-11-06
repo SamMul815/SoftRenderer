@@ -103,17 +103,30 @@ void UpdateFrame(void)
 	degree += 0.1f;
 	degree = fmodf(degree, 360.0f);
 
-	Matrix2 rotMat;
-	rotMat.SetRotation(degree);
+	static float scale = 1.0f;
+	scale += 0.01f;
+	scale = fmodf(scale, 2.0f);
 
+
+
+	Matrix3 rotMat;
+	rotMat.SetRotation(degree);
+	
+	Matrix3 scaleMat;
+	scaleMat.SetScale(scale, scale);
+
+	Matrix3 transMat;
+	transMat.SetTranslation((sinf(Deg2Rad(degree * 5.0f)) + 1.0f) * 100.0f, 0.0f);
+
+	Matrix3 TSR = transMat * scaleMat * rotMat;
+	
 	for (int x = -radius; x < radius; x++)
 	{
 		for (int y = -radius; y < radius; y++)
 		{
-			PutPixel(Vector2(x, y) * rotMat);
+			PutPixel(Vector3(x, y, 1) * TSR);
 		}
 	}
-
 
 
 	// Buffer Swap 
