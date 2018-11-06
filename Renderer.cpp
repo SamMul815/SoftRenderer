@@ -35,77 +35,32 @@ void UpdateFrame(void)
 	SetColor(32, 128, 255);
 	Clear();
 
+
+	static Vector3 rgb;
+	rgb.X += 0.5f;
+	rgb.Y += 1.0f;
+	rgb.Z += 2.0f;
+
+	rgb.X = fmodf(rgb.X,255.0f);
+	rgb.Y = fmodf(rgb.Y, 255.0f);
+	rgb.Z = fmodf(rgb.Z, 255.0f);
+
 	// Draw
-	SetColor(255, 0, 0);
+	SetColor(rgb.X, rgb.Y, rgb.Z);
 	//PutPixel(0, 0);
 	//Draw Circle wih radius 100
 	Vector2 center(0.0f, 0.0f);
 	float radius = 100.0f;
 	
-	//Matrix2 scaleMat;
-	//scaleMat.SetScale(2.0f, 0.5f);
-
-	//Matrix2 rotMat;
-	//rotMat.SetRotation(30.0f);
-
-	//Matrix2 SRMat = scaleMat * rotMat;
-	//Matrix2 RSMat = rotMat * scaleMat;
-
-	//for (int x = -radius; x < radius; x++)
-	//{
-	//	for (int y = 0; y < radius; y++)
-	//	{
-	//		IntPoint pt(x, y);
-	//		Vector2 ptVec = pt.ToVector2();
-	//		if (Vector2::DistSquared(Vector2(0, 0), ptVec) <= radius * radius)
-	//		{		
-	//			IntPoint SRPt(ptVec * SRMat);
-	//			IntPoint RSPt(ptVec * RSMat);
-	//			PutPixel(RSPt);
-	//		}
-	//	}
-	//}
-
-	//type 1
-	//for (int x = 0; x < 360; x++)
-	//{
-	//	IntPoint pt(radius, 0);
-	//	
-	//	Matrix2 rotMat;
-	//	rotMat.SetRotation((float) x);
-	//	IntPoint rotpt(pt.ToVector2() * rotMat);
-	//	PutPixel(rotpt);
-	//}
-
-	//Matrix2 scaleMat;
-	//scaleMat.SetScale(0.95f,0.95f);
-
-	////type2
-	//for (int x = -radius; x < radius; x++)
-	//{
-	//	for (int y = -radius; y < radius; y++)
-	//	{
-	//		IntPoint pt(x, y);
-	//		Vector2 ptVec = pt.ToVector2();
-	//		if (Vector2::DistSquared(Vector2(0, 0), ptVec) <= radius * radius)
-	//		{		
-	//			SetColor(255, 0, 0);
-	//			PutPixel(pt);
-	//			
-	//			IntPoint SPt(ptVec * scaleMat);
-	//			SetColor(32, 128, 255);
-	//			PutPixel(SPt);
-	//		}
-	//	}
-	//}
 
 	static float degree = 0.0f;
-	degree += 0.1f;
+	degree += 0.5f;
 	degree = fmodf(degree, 360.0f);
 
 	static float scale = 1.0f;
-	scale += 0.01f;
-	scale = fmodf(scale, 2.0f);
+	scale += 0.5f;
+	float scaleSin = sinf(Deg2Rad(scale)) + 1.0f;
+	//scale = fmodf(scale, 2.0f);
 
 
 
@@ -113,10 +68,10 @@ void UpdateFrame(void)
 	rotMat.SetRotation(degree);
 	
 	Matrix3 scaleMat;
-	scaleMat.SetScale(scale, scale);
+	scaleMat.SetScale(scaleSin, scaleSin);
 
 	Matrix3 transMat;
-	transMat.SetTranslation((sinf(Deg2Rad(degree * 5.0f)) + 1.0f) * 100.0f, 0.0f);
+	transMat.SetTranslation((sinf(Deg2Rad(degree)) + 1.0f) * 100.0f, 0.0f);
 
 	Matrix3 TSR = transMat * scaleMat * rotMat;
 	
