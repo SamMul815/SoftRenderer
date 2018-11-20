@@ -9,6 +9,7 @@
 int g_nClientWidth = 640;
 int g_nClientHeight = 480;
 bool g_bIsActive;
+Texture* g_Texture = NULL;
 
 #define MAX_LOADSTRING 100
 
@@ -34,6 +35,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
+	g_Texture = new Texture();
 
     // TODO: 여기에 코드를 입력합니다.
 
@@ -179,6 +181,7 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     }
+	g_Texture->LoadBMP("test.bmp");
     return (INT_PTR)FALSE;
 }
 

@@ -1,0 +1,17 @@
+Linearity(선형성)
+f(x+y) = f(x) + f(y)
+a * f(x) = f(a*x)
+
+Linearity -> Vector Space -> Vector -> Linear Transformation
+선형자체는 Matrix로 계산
+
+기준이 되는 벡터 = 기저벡터(basis vecto)
+기저벡터는 서로 영향을 끼칠수 없다.
+
+기저벡터 만으로 모든 벡터를 생성(Span)할 수 있다.
+
+기저벡터를 변형하는 방법 -> matrix 계산
+
+행렬식(determinant) (ad-bc)
+
+역행렬

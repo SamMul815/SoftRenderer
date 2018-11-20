@@ -3,12 +3,14 @@
 #include "SoftRenderer.h"
 #include "GDIHelper.h"
 #include "Renderer.h"
-
+#include "Vertex.h"
 #include "Vector.h"
 #include "IntPoint.h"
 
 bool IsInRange(int x, int y);
 void PutPixel(int x, int y);
+void DrawTriangle(const Vertex &p1, const Vertex &p2, const Vertex &p3);
+void DrawTriangle(const Vector3 &p1, const Vector3 &p2, const Vector3 &p3);
 
 bool IsInRange(int x, int y)
 {
@@ -44,6 +46,73 @@ void DrawLine(const Vector3 &Start, const Vector3 &end)
 		// l = (1-t)p + tQ p -> Q
 		PutPixel(pt);
 	}	
+}
+
+void DrawTriangle(const Vertex &v1, const Vertex &v2, const Vertex &v3)
+{
+	Vector2 minPos = Vector2(INFINITY, INFINITY);
+	Vector2 maxPos = Vector2(-INFINITY, -INFINITY);
+
+	if (v1.position.X < minPos.x) minPos.x = v1.position.X;
+	if (v1.position.Y < minPos.y) minPos.y = v1.position.Y;
+	if (v1.position.X > maxPos.x) maxPos.x = v1.position.X;
+	if (v1.position.Y > maxPos.y) maxPos.y = v1.position.Y;
+
+	if (v2.position.X < minPos.x) minPos.x = v2.position.X;
+	if (v2.position.Y < minPos.y) minPos.y = v2.position.Y;
+	if (v2.position.X > maxPos.x) maxPos.x = v2.position.X;
+	if (v2.position.Y > maxPos.y) maxPos.y = v2.position.Y;
+
+	if (v3.position.X < minPos.x) minPos.x = v3.position.X;
+	if (v3.position.Y < minPos.y) minPos.y = v3.position.Y;
+	if (v3.position.X > maxPos.x) maxPos.x = v3.position.X;
+	if (v3.position.Y > maxPos.y) maxPos.y = v3.position.Y;
+
+	Vector3 u = v2.position - v1.position;
+	Vector3 v = v3.position - v1.position;
+
+	float dotUU = Vector3::Dot(u, u);
+	float dotUV = Vector3::Dot(u, v);
+	float dotVV = Vector3::Dot(v, v);
+	float invDenom = 1.0f / (dotUU * dotVV - dotUV * dotUV);
+
+	IntPoint minpt(minPos);
+	IntPoint maxPt(maxPos);
+
+	for (int x = minpt.x; x < maxPt.x; x++)
+	{
+		for (int y = minpt.y; y < maxPt.y; y++)
+		{
+			IntPoint pt(x, y);
+			Vector3 w = pt.ToVector3() - v1.position;
+			float dotUW = Vector3::Dot(u, w);
+			float dotVW = Vector3::Dot(v, w);
+			float s = (dotVV * dotUW - dotUV * dotVW) * invDenom;
+			float t = (dotUU * dotVW - dotUV * dotUW) * invDenom;
+			if (s >= 0 && t >= 0 && ((s + t) <= 1))
+			{
+				BYTE RV1 = GetRValue(v1.color);
+				BYTE RV2 = GetRValue(v2.color);
+				BYTE RV3 = GetRValue(v3.color);
+
+				BYTE GV1 = GetGValue(v1.color);
+				BYTE GV2 = GetGValue(v2.color);
+				BYTE GV3 = GetGValue(v3.color);
+
+				BYTE BV1 = GetBValue(v1.color);
+				BYTE BV2 = GetBValue(v2.color);
+				BYTE BV3 = GetBValue(v3.color);
+
+				BYTE FinalR = (BYTE)(RV1 * (1 - s - t) + RV2 * x + RV3 * t);
+				BYTE FinalG = (BYTE)(GV1 * (1 - s - t) + GV2 * x + GV3 * t);
+				BYTE FinalB = (BYTE)(BV1 * (1 - s - t) + BV2 * x + BV3 * t);
+
+				SetColor(FinalR, FinalG, FinalB);
+
+				PutPixel(pt);
+			}
+		}
+	}
 }
 
 void DrawTriangle(const Vector3 &p1, const Vector3 &p2, const Vector3 &p3)
@@ -137,10 +206,21 @@ void UpdateFrame(void)
 	Vector3 p3(100.0f, 100.0f, 1.0f);
 	Vector3 p4(100, -100, 1.0f);
 
+	ULONG c1 = RGB32(255, 0, 0);
+	ULONG c2 = RGB32(0, 255, 0);
+	ULONG c3 = RGB32(0, 0, 255);
 
 
-	DrawTriangle(p1 * TRS, p2 * TRS, p3 * TRS);
-	DrawTriangle(p1 * TRS, p3 * TRS, p4 * TRS);
+	Vertex v1(p1, c1);
+	Vertex v2(p2, c2);
+	Vertex v3(p3, c3);
+
+
+	DrawTriangle(v1, v2, v3);
+	//DrawTriangle(p1 * TRS, p2 * TRS, p3 * TRS);
+	//DrawTriangle(p1 * TRS, p3 * TRS, p4 * TRS);
+
+
 
 	//SetColor(255, 0, 0);
 	//float radius = 100.0f;
