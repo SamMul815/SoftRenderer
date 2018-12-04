@@ -6,6 +6,10 @@
 #include "Vertex.h"
 #include "Vector.h"
 #include "IntPoint.h"
+#include "QuadMesh.h"
+#include "GameObject.h"
+#include "Transform.h"
+#include "Mesh.h"
 
 bool IsInRange(int x, int y);
 void PutPixel(int x, int y);
@@ -164,74 +168,76 @@ void DrawTriangle(const Vector3 &p1, const Vector3 &p2, const Vector3 &p3)
 	}
 }
 
+void DrawTriangle(const Triangle &triangle)
+{
+	IntPoint minPt(triangle.minPos);
+	IntPoint maxPt(triangle.maxPos);
+
+	for (int x = minPt.x; x < maxPt.x; x++)
+	{
+		for (int y = minPt.y; y < maxPt.y; y++)
+		{
+			IntPoint pt(x, y);
+			Vector2 baryValues = triangle.GetBaryCentricCoordinate(pt.ToVector3());
+			if (baryValues.x >= 0 && baryValues.y >= 0 && ((baryValues.x + baryValues.y) <= 1))
+			{
+				ULONG finalColor = RGB32(255, 0, 0);
+				if (g_Texture->IsLoaded())
+				{
+					finalColor = triangle.GetTextureColor(g_Texture, baryValues);
+				}
+				else
+				{
+					finalColor = triangle.GetInterpolatedColor(baryValues);
+				}
+				SetColor(finalColor);
+				PutPixel(pt);
+			}
+		}
+	}
+}
+
 
 void UpdateFrame(void)
 {
 	// Buffer Clear
 	SetColor(32, 128, 255);
-
 	Clear();
-	SetColor(255, 0, 0);
-	//Vector3 Start(0, 0, 1);
-	//Vector3 End(100, 100, 1);
-	static float xPos = 0.0f;
-	static float yPos = 0.0f;
-	static float scale = 1.0f;
-	static float angle = 0.0f;
+	
+	static float theta = 0;
+	static float pos = 0;
+	static float scale = 1;
 
-
-	if (GetAsyncKeyState(VK_LEFT)) angle += 1.0f;
-	if (GetAsyncKeyState(VK_RIGHT)) angle -= 1.0f;
-
-	if (GetAsyncKeyState(VK_UP)) yPos += 1.0f;
-	if (GetAsyncKeyState(VK_DOWN)) yPos -= 1.0f;
-
+	// Input 
+	if (GetAsyncKeyState(VK_LEFT)) theta -= 1;
+	if (GetAsyncKeyState(VK_RIGHT)) theta += 1;
+	if (GetAsyncKeyState(VK_UP)) pos += 1;
+	if (GetAsyncKeyState(VK_DOWN)) pos -= 1;
 	if (GetAsyncKeyState(VK_PRIOR)) scale += 0.01f;
 	if (GetAsyncKeyState(VK_NEXT)) scale -= 0.01f;
 
-	Matrix3 tMat;
-	tMat.SetTranslation(xPos, yPos);
+	static Vector3 p1 = Vector3::Make2DPoint(-80, -80);
+	static Vector3 p2 = Vector3::Make2DPoint(-80, 80);
+	static Vector3 p3 = Vector3::Make2DPoint(80, 80);
+	static Vector3 p4 = Vector3::Make2DPoint(80, -80);
 
-	Matrix3 sMat;
-	sMat.SetScale(scale, scale);
+	static Vertex v1(p1, RGB32(255, 0, 0), Vector2(0.125f, 0.25f));
+	static Vertex v2(p2, RGB32(0, 255, 0), Vector2(0.125f, 0.125f));
+	static Vertex v3(p3, RGB32(0, 0, 255), Vector2(0.25f, 0.125f));
+	static Vertex v4(p4, RGB32(255, 255, 255), Vector2(0.25f, 0.25f));
 
-	Matrix3 rMat;
-	rMat.SetRotation(angle);
+	static Triangle tri1(v1, v2, v3);
+	static Triangle tri2(v1, v3, v4);
+	static QuadMesh mesh1(tri1, tri2);
 
-	Matrix3 TRS = tMat * rMat * sMat;
-	//DrawLine(Start * TRS, End * TRS );
+	Transform2D transform1(Vector2(pos, pos), theta, Vector2(scale, scale));
+	GameObject2D obj1(mesh1);
+	obj1.SetTransform(transform1);
 
-	Vector3 p1(-100.0f, -100.0f,1.0f);
-	Vector3 p2(-100.0f, 100.0f, 1.0f);
-	Vector3 p3(100.0f, 100.0f, 1.0f);
-	Vector3 p4(100, -100, 1.0f);
-
-	ULONG c1 = RGB32(255, 0, 0);
-	ULONG c2 = RGB32(0, 255, 0);
-	ULONG c3 = RGB32(0, 0, 255);
-
-
-	Vertex v1(p1, c1);
-	Vertex v2(p2, c2);
-	Vertex v3(p3, c3);
-
-
-	DrawTriangle(v1, v2, v3);
-	//DrawTriangle(p1 * TRS, p2 * TRS, p3 * TRS);
-	//DrawTriangle(p1 * TRS, p3 * TRS, p4 * TRS);
-
-
-
-	//SetColor(255, 0, 0);
-	//float radius = 100.0f;
-	//int nradius = (int)radius;
-	//for (int i = -nradius; i <= nradius; i++)
-	//{
-	//	for (int j = -nradius; j <= nradius; j++)
-	//	{
-	//		PutPixel(Vector3(i, j,1) *  sMat * rMat* tMat);
-	//	}
-	//}
+	for (int i = 0; i < 2; i++)
+	{
+		DrawTriangle(obj1.Mesh.Triangles[i]);
+	}
 
 	// Buffer Swap 
 	BufferSwap();

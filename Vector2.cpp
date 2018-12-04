@@ -22,7 +22,15 @@ Vector2 Vector2::operator*(const Matrix2 & mat) const
 	result.y = x * mat._21 + y * mat._22;
 	return result;
 }
+Vector2 Vector2::operator*(float scale) const
+{
+	return Vector2(x * scale, y * scale);
+}
 
+Vector2 Vector2::operator+(const Vector2 & V) const
+{
+	return Vector2(x + V.x, y + V.y);
+}
 bool Vector2::Equals(const Vector2 & V, float tolerance) const
 {
 	return (fabsf(V.x - x) < tolerance) && (fabsf(V.y - y) < tolerance);

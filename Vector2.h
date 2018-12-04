@@ -15,7 +15,9 @@ public:
 	static float DistSquared(const Vector2 &v1, const Vector2 &v2);
 	
 	Vector2 operator*(const Matrix2 &mat) const;
-	
+	Vector2 operator*(float scale) const;
+	Vector2 operator+(const Vector2 &V) const;
+
 	bool Equals(const Vector2& V, float tolerance = KINDA_SMALL_NUMBER) const;
 
 };
